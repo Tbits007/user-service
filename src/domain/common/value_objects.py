@@ -1,10 +1,8 @@
-from abc import ABC
 from dataclasses import dataclass
 
 
 @dataclass(frozen=True)
-class DomainValueObject(ABC):
-    
+class DomainValueObject:
     def validate(self) -> None:
         pass
 
