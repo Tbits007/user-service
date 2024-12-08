@@ -16,13 +16,13 @@ class UserReader(Protocol):
         ...
 
 
-class DBSession(Protocol):
+class UserUpdater(Protocol):
     @abstractmethod
-    async def commit(self) -> None:
-        """Закоммитить текущую транзакцию."""
+    async def update(self, uuid: str, user: UserDM) -> None:
         ...
 
+
+class UserDeleter(Protocol):
     @abstractmethod
-    async def flush(self) -> None:
-        """Отправить изменения в базу данных без коммита."""
+    async def delete(self, uuid: str) -> None:
         ...
