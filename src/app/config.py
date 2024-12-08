@@ -1,23 +1,31 @@
-from os import environ as env
+from pydantic import Field
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
-from pydantic import Field, BaseModel
+
+class ConfigModel(BaseSettings):
+    
+    model_config = SettingsConfigDict(env_file='.env', env_file_encoding='utf-8')
 
 
-class RabbitMQConfig(BaseModel):
+class RabbitMQConfig(ConfigModel):
     host: str = Field(alias='RABBITMQ_HOST')
     port: int = Field(alias='RABBITMQ_PORT')
     login: str = Field(alias='RABBITMQ_USER')
     password: str = Field(alias='RABBITMQ_PASS')
 
-
-class PostgresConfig(BaseModel):
+    
+class PostgresConfig(ConfigModel):
     host: str = Field(alias='POSTGRES_HOST')
     port: int = Field(alias='POSTGRES_PORT')
     login: str = Field(alias='POSTGRES_USER')
     password: str = Field(alias='POSTGRES_PASSWORD')
     database: str = Field(alias='POSTGRES_DB')
 
+    @property
+    def DATABASE_URL(self):
+        return f'postgresql+asyncpg://{self.login}:{self.password}@{self.host}:{self.port}/{self.database}'
 
-class Config(BaseModel):
-    rabbitmq: RabbitMQConfig = Field(default_factory=lambda: RabbitMQConfig(**env))
-    postgres: PostgresConfig = Field(default_factory=lambda: PostgresConfig(**env))
+
+class Config(ConfigModel):
+    rabbitmq: RabbitMQConfig 
+    postgres: PostgresConfig
