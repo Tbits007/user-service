@@ -11,6 +11,9 @@ fastapi = {extras = ["all"], version = "^0.115.6"}
 sqlalchemy = "^2.0.36"
 asyncpg = "^0.30.0"
 alembic = "^1.14.0"
+dishka = "^1.4.2"
+faststream = {version = "0.5.11", extras = ["rabbit"]}
+pydantic = "2.7.0"
 
 
 [build-system]

@@ -1,7 +1,6 @@
 import sqlalchemy as sa
 from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import mapped_column
-from sqlalchemy.dialects.postgresql import UUID
 
 from src.app.infrastructure.models.base_model import Base
 
@@ -10,11 +9,9 @@ class User(Base):
     __tablename__ = "users"
 
     uuid: Mapped[str] = mapped_column(
-        UUID(as_uuid=True),
+        "uuid",
+        sa.Uuid,
         primary_key=True,
-        server_default=sa.text("gen_random_uuid()"),
-        unique=True,
-        nullable=False,
     )
     email: Mapped[str] = mapped_column(nullable=False)
     password: Mapped[str] = mapped_column(nullable=False)
