@@ -22,7 +22,14 @@ class PostgresConfig(BaseModel):
         return f'postgresql+asyncpg://{self.login}:{self.password}@{self.host}:{self.port}/{self.database}'
  
 
+class JWTConfig(BaseModel):
+    SECRET_KEY: str
+    ALGORITHM: str
+    ACCESS_TOKEN_EXPIRES_MINUTES: int
+    REFRESH_TOKEN_EXPIRES_MINUTES: int
+
+
 class Config(BaseModel):
     rabbitmq: RabbitMQConfig = Field(default_factory=lambda: RabbitMQConfig(**env))
     postgres: PostgresConfig = Field(default_factory=lambda: PostgresConfig(**env))
-
+    JWT_Config: JWTConfig = Field(default_factory=lambda: JWTConfig(**env))

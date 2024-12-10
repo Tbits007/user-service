@@ -7,8 +7,10 @@ from app.ioc import AppProvider
 
 from app.controllers.user_controllers.user_api import router as user_router
 
+
 config = Config()
 container = make_async_container(AppProvider(), context={Config: config})
+
 
 routers = (
     user_router, 

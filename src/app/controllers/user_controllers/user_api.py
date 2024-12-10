@@ -5,7 +5,7 @@ from dishka.integrations.fastapi import (
 from fastapi import APIRouter
 from app.application.dtos.user_dtos import NewUserDTO
 from app.application.interactors.user_interactors import NewUserInteractor
-from app.controllers.user_controllers.user_schemas import UserCreateSchema
+from app.controllers.user_controllers.user_schemas import UserCreateSchema, UserReadSchema
 
 router = APIRouter(
     prefix="/users",
@@ -13,12 +13,12 @@ router = APIRouter(
 )
 
 
-@router.post("/create_user/")
+@router.post("/register/")
 @inject
 async def create_user(
     data: UserCreateSchema,
     interactor: FromDishka[NewUserInteractor]
-    ):
+    ) -> None:
 
     dto = NewUserDTO(
         email=data.email,
@@ -27,4 +27,3 @@ async def create_user(
         is_superuser=data.is_superuser,
     )
     await interactor(dto)
-    return {"msg": "bebra"}
