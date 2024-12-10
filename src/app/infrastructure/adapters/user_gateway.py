@@ -31,6 +31,23 @@ class UserGateway(
             is_superuser=row.is_superuser
         )
 
+    async def read_by_email(self, email: str) -> UserDM | None:
+        query = text("SELECT * FROM users WHERE email = :email")
+        result = await self._session.execute(
+            statement=query,
+            params={"email": email},
+        )
+        row = result.fetchone()
+        if not row:
+            return None
+        return UserDM(
+            uuid=row.uuid,
+            email=row.email,
+            password=row.password,
+            is_active=row.is_active,
+            is_superuser=row.is_superuser
+        )
+
     async def save(self, user: UserDM) -> None:
         query = text(
             """

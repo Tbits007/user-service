@@ -14,6 +14,8 @@ alembic = "^1.14.0"
 dishka = "^1.4.2"
 faststream = {version = "0.5.11", extras = ["rabbit"]}
 pydantic = "2.7.0"
+passlib = "^1.7.4"
+bcrypt = "^4.2.1"
 
 
 [build-system]

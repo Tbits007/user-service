@@ -15,6 +15,10 @@ class UserReader(Protocol):
     async def read_by_uuid(self, uuid: str) -> UserDM | None:
         ...
 
+    @abstractmethod
+    async def read_by_email(self, email: str) -> UserDM | None:
+        ...
+
 
 class UserUpdater(Protocol):
     @abstractmethod

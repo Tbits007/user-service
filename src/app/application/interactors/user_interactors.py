@@ -3,7 +3,7 @@ from app.application.dtos.user_dtos import NewUserDTO, UpdateUserDTO
 from app.domain.entities import user_entity
   
   
-class GetUserInteractor:  
+class GetUserByUuidInteractor:  
     def __init__(  
             self,  
             user_gateway: user_interfaces.UserReader,  
@@ -13,7 +13,18 @@ class GetUserInteractor:
     async def __call__(self, uuid: str) -> user_entity.UserDM | None:  
         return await self._user_gateway.read_by_uuid(uuid)  
   
+
+class GetUserByEmailInteractor:  
+    def __init__(  
+            self,  
+            user_gateway: user_interfaces.UserReader,  
+    ) -> None:  
+        self._user_gateway = user_gateway  
   
+    async def __call__(self, email: str) -> user_entity.UserDM | None:  
+        return await self._user_gateway.read_by_email(email)  
+
+
 class NewUserInteractor:  
     def __init__(  
             self,  

@@ -10,7 +10,8 @@ from app.application.interfaces import (
 )
 from app.application.interactors.user_interactors import (
     DeleteUserInteractor,
-    GetUserInteractor,
+    GetUserByEmailInteractor,
+    GetUserByUuidInteractor,
     NewUserInteractor,
     UpdateUserInteractor
 )
@@ -51,6 +52,7 @@ class AppProvider(Provider):
     )
 
     create_new_user_interactor = provide(NewUserInteractor, scope=Scope.REQUEST)
-    get_user_interactor = provide(GetUserInteractor, scope=Scope.REQUEST)
+    get_user_by_uuid_interactor = provide(GetUserByUuidInteractor, scope=Scope.REQUEST)
+    get_user_by_email_interactor = provide(GetUserByEmailInteractor, scope=Scope.REQUEST)
     update_user_interactor = provide(UpdateUserInteractor, scope=Scope.REQUEST)
     delete_user_interactor = provide(DeleteUserInteractor, scope=Scope.REQUEST)

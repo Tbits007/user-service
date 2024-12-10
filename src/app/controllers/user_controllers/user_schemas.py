@@ -1,15 +1,16 @@
 from pydantic import BaseModel
 
 
-class UserReadSchema(BaseModel):
+class UserRegisterSchema(BaseModel):
     email: str 
     password: str 
     is_active: bool 
     is_superuser: bool 
 
 
-class UserCreateSchema(BaseModel):
+class UserLoginSchema(BaseModel):
     email: str 
     password: str 
-    is_active: bool 
-    is_superuser: bool 
+
+
+
