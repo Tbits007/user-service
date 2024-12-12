@@ -16,6 +16,7 @@ faststream = {version = "0.5.11", extras = ["rabbit"]}
 pydantic = "2.7.0"
 passlib = "^1.7.4"
 bcrypt = "^4.2.1"
+python-jose = "^3.3.0"
 
 
 [build-system]

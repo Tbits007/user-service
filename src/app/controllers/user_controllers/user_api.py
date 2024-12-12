@@ -2,11 +2,13 @@ from dishka.integrations.fastapi import (
     FromDishka,
     inject,
 )
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Request, Response
 from app.application.dtos.user_dtos import NewUserDTO
-from app.application.interactors.user_interactors import GetUserByEmailInteractor, NewUserInteractor
-from app.controllers.user_controllers.user_schemas import UserRegisterSchema, UserLoginSchema
-from app.infrastructure.oauth.hash import get_password_hash
+from app.application.interactors.user_interactors import GetUserByEmailInteractor, GetUserByUuidInteractor, NewUserInteractor
+from app.application.interfaces.jwt_interface import JwtTokenInterface
+from app.application.interfaces.password_hasher_interface import PasswordHasherInterface
+from app.controllers.user_controllers.user_schemas import UserReadSchema, UserRegisterSchema, UserLoginSchema
+from app.infrastructure.adapters.auth.utils import AddAccessTokenCookie, Authenticate, GetCurrentUser, GetToken
 
 router = APIRouter(
     prefix="/users",
@@ -20,7 +22,8 @@ async def register(
     data: UserRegisterSchema,
     create_user_interactor: FromDishka[NewUserInteractor],
     get_user_interactor: FromDishka[GetUserByEmailInteractor],
-    ) -> None:
+    password_hash: FromDishka[PasswordHasherInterface]
+    ) -> None: 
 
     # check by email if exists
     user = await get_user_interactor(data.email)
@@ -28,7 +31,7 @@ async def register(
         raise HTTPException(status_code=400, detail="Email has already registered")
  
     # hashing password
-    hashed_password = get_password_hash(data.password)
+    hashed_password = password_hash.get_password_hash(data.password)
 
     # save user to db
     dto = NewUserDTO(
@@ -44,17 +47,35 @@ async def register(
 
 
 
-# @router.post("/login/")
-# @inject
-# async def login(
-#     data: UserLoginSchema,
-#     interactor: FromDishka[GetUserInteractor]
-#     ) -> None:
+@router.post("/login/")
+@inject
+async def login(
+    data: UserLoginSchema,
+    jwt_service: FromDishka[JwtTokenInterface],
+    get_by_email_interactor: FromDishka[GetUserByEmailInteractor],
+    password_hasher: FromDishka[PasswordHasherInterface],
+    response: Response
+    ) -> dict[str, list[str]]:
 
-#     #get user data
-#     dto = GetUserDTO(
-#         uuid=data.uuid
-#     )
-#     user_data = await interactor(dto)
+    user = await Authenticate(get_by_email_interactor, password_hasher)(email=data.email, password=data.password)
+    if not user:
+        raise HTTPException(status_code=400)
+  
+    access_token = jwt_service.encode_access_token(user=user)
+ 
+    #add_access_token_cookie
+    await AddAccessTokenCookie()(response, access_token)
+    return {"token": access_token}
 
-#     #verify
+
+@router.post("/me/")
+@inject
+async def get_user_data(
+    request: Request,
+    get_user_interactor: FromDishka[GetUserByUuidInteractor],
+    jwt_service: FromDishka[JwtTokenInterface]
+    ) -> UserReadSchema:
+
+    token = await GetToken()(request)
+    current_user = await GetCurrentUser(get_user_interactor, jwt_service)(token)
+    return current_user

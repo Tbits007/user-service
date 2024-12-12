@@ -23,10 +23,9 @@ class PostgresConfig(BaseModel):
  
 
 class JWTConfig(BaseModel):
-    SECRET_KEY: str
-    ALGORITHM: str
-    ACCESS_TOKEN_EXPIRES_MINUTES: int
-    REFRESH_TOKEN_EXPIRES_MINUTES: int
+    SECRET_KEY: str = Field(alias='SECRET_KEY')
+    ALGORITHM: str = Field(alias='ALGORITHM')
+    ACCESS_TOKEN_EXPIRES_MINUTES: int = Field(alias='ACCESS_TOKEN_EXPIRES_MINUTES')
 
 
 class Config(BaseModel):

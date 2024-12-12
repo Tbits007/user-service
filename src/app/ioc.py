@@ -6,7 +6,9 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from app.application.interfaces import (
     user_interfaces,
-    db_interfaces
+    db_interfaces,
+    jwt_interface,
+    password_hasher_interface,
 )
 from app.application.interactors.user_interactors import (
     DeleteUserInteractor,
@@ -19,11 +21,13 @@ from app.application.interfaces.uuid_generator_interfaces import UUIDGenerator
 from app.config import Config
 from app.infrastructure.database import new_session_maker
 from app.infrastructure.adapters.user_gateway import UserGateway
+from app.infrastructure.adapters.auth.jwt_impl import JwtTokenService
+from app.infrastructure.adapters.auth.password_hasher_impl import PasswordHasherImpl
 
 
 class AppProvider(Provider):
     config = from_context(provides=Config, scope=Scope.APP)
-
+    
     @provide(scope=Scope.APP)
     def get_uuid_generator(self) -> UUIDGenerator:
         return uuid4
@@ -50,9 +54,22 @@ class AppProvider(Provider):
             user_interfaces.UserDeleter
             ]
     )
-
+    
     create_new_user_interactor = provide(NewUserInteractor, scope=Scope.REQUEST)
     get_user_by_uuid_interactor = provide(GetUserByUuidInteractor, scope=Scope.REQUEST)
     get_user_by_email_interactor = provide(GetUserByEmailInteractor, scope=Scope.REQUEST)
     update_user_interactor = provide(UpdateUserInteractor, scope=Scope.REQUEST)
     delete_user_interactor = provide(DeleteUserInteractor, scope=Scope.REQUEST)
+
+    #auth
+    password_hasher = provide(
+        PasswordHasherImpl,
+        scope=Scope.REQUEST,
+        provides=password_hasher_interface.PasswordHasherInterface
+    )
+
+    jwt_service = provide(
+        JwtTokenService,
+        scope=Scope.REQUEST,
+        provides=jwt_interface.JwtTokenInterface
+    )

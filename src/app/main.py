@@ -4,7 +4,6 @@ from fastapi import FastAPI
 
 from app.config import Config
 from app.ioc import AppProvider
-
 from app.controllers.user_controllers.user_api import router as user_router
 
 
@@ -33,4 +32,5 @@ def get_app():
     
     return fastapi_app
 
+# $env:PYTHONPATH="C:\\PythonProjects\\FastAPIprojects\\user-service\\src"
 # uvicorn --factory app.main:get_app --reload

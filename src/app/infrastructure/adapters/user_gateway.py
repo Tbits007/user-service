@@ -24,7 +24,7 @@ class UserGateway(
         if not row:
             return None
         return UserDM(
-            uuid=row.uuid,
+            uuid=str(row.uuid),
             email=row.email,
             password=row.password,
             is_active=row.is_active,
@@ -110,7 +110,7 @@ class UserGateway(
 
         # Возвращаем обновлённый объект UserDM
         return UserDM(
-            uuid=row.uuid,
+            uuid=str(row.uuid),
             email=row.email,
             password=row.password,
             is_active=row.is_active,
