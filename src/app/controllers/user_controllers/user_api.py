@@ -55,14 +55,13 @@ async def login(
     get_by_email_interactor: FromDishka[GetUserByEmailInteractor],
     password_hasher: FromDishka[PasswordHasherInterface],
     response: Response
-    ) -> dict[str, list[str]]:
+    ) -> dict[str, str]:
 
     user = await Authenticate(get_by_email_interactor, password_hasher)(email=data.email, password=data.password)
     if not user:
         raise HTTPException(status_code=400)
   
-    access_token = jwt_service.encode_access_token(user=user)
- 
+    access_token = jwt_service.encode_access_token(user=user)[0]
     #add_access_token_cookie
     await AddAccessTokenCookie()(response, access_token)
     return {"token": access_token}
