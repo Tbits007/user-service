@@ -37,7 +37,7 @@ class GetToken:
 
 
 # Класс для получения текущего пользователя
-class GetCurrentUser:
+class  GetCurrentUser:
     def __init__(
             self,
             get_user_interactor: GetUserByUuidInteractor,
