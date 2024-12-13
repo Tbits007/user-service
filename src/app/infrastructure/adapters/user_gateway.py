@@ -1,9 +1,9 @@
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.sql import text
 
 from app.application.interfaces.user_interface import UserReader, UserSaver, UserUpdater
 from app.domain.entities.user_entity import UserDM
-from app.infrastructure.models.user_model import User
+from app.infrastructure.database.models.user_model import User
 
 
 class UserGateway(
@@ -19,7 +19,7 @@ class UserGateway(
         db_user = User(
             email=user.email,
             username=user.username,
-            hashed_password=user.password,  # Предполагается, что пароль уже хэширован
+            password=user.password,
             is_active=user.is_active,
             is_verified=user.is_verified,
             is_superuser=user.is_superuser,
@@ -27,7 +27,8 @@ class UserGateway(
         self._session.add(db_user)
         await self._session.commit()
 
-    async def read_by_email(self, email: str) -> Optional[UserDM]:
+
+    async def read_by_email(self, email: str) -> UserDM | None:
         """Читает пользователя из базы данных по email."""
         query = select(User).where(User.email == email)
         result = await self._session.execute(query)
@@ -41,7 +42,7 @@ class UserGateway(
                 is_verified=db_user.is_verified,
                 is_superuser=db_user.is_superuser,
             )
-        except NoResultFound:
+        except Exception:
             return None
 
     async def update(self, email: str, update_data: dict) -> None:
@@ -54,5 +55,5 @@ class UserGateway(
                 if hasattr(db_user, field):
                     setattr(db_user, field, value)
             await self._session.commit()
-        except NoResultFound:
+        except Exception:
             raise ValueError(f"User with email {email} not found")

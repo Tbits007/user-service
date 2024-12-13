@@ -1,5 +1,5 @@
 from app.application.dtos.user_dtos import CreateUserDTO, LoginUserDTO
-from app.application.interfaces.jwt_interface import JwtProcessorInterface, TokenType
+from app.application.interfaces.jwt_processor_interface import JwtProcessorInterface, TokenType
 from app.application.interfaces.password_hasher_interface import PasswordHasherInterface
 from app.application.interfaces.user_interface import UserReader, UserSaver, UserUpdater
 from app.application.interfaces.email_sender_interface import EmailSender

@@ -6,8 +6,8 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from app.application.interfaces import (
     db_interface,
+    jwt_processor_interface,
     user_interface,
-    jwt_interface,
     password_hasher_interface,
 )
 from app.application.interactors.user_interactors import (
@@ -71,5 +71,5 @@ class AppProvider(Provider):
     jwt_service = provide(
         JwtTokenService,
         scope=Scope.REQUEST,
-        provides=jwt_interface.JwtTokenInterface
+        provides=jwt_processor_interface.JwtTokenInterface
     )
