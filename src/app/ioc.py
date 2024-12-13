@@ -5,8 +5,8 @@ from dishka import Provider, Scope, provide, AnyOf, from_context
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from app.application.interfaces import (
-    user_interfaces,
-    db_interfaces,
+    db_interface,
+    user_interface,
     jwt_interface,
     password_hasher_interface,
 )
@@ -39,7 +39,7 @@ class AppProvider(Provider):
     @provide(scope=Scope.REQUEST)
     async def get_session(self, session_maker: async_sessionmaker[AsyncSession]) -> AsyncIterable[AnyOf[
         AsyncSession,
-        db_interfaces.DBSession,
+        db_interface.DBSession,
     ]]:
         async with session_maker() as session:
             yield session
@@ -48,10 +48,10 @@ class AppProvider(Provider):
         UserGateway,
         scope=Scope.REQUEST,
         provides=AnyOf[
-            user_interfaces.UserReader,
-            user_interfaces.UserSaver,
-            user_interfaces.UserUpdater,
-            user_interfaces.UserDeleter
+            user_interface.UserReader,
+            user_interface.UserSaver,
+            user_interface.UserUpdater,
+            user_interface.UserDeleter
             ]
     )
     

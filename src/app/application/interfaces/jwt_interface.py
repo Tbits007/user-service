@@ -1,13 +1,33 @@
-from typing import Self, Protocol
+from enum import Enum
+from typing import Literal, Protocol
 from abc import abstractmethod
-from app.domain.entities.user_entity import UserDM
 
 
-class JwtTokenInterface(Protocol):
+Algorithm = Literal[
+    "HS256", "HS384", "HS512",
+    "RS256", "RS384", "RS512",
+]
+
+class TokenType(Enum):
+    ACCESS = "access"
+    REFRESH = "refresh"
+    PASSWORD_RESET = "password_reset"
+    ACCOUNT_VERIFICATION = "account_verification"
+    
+
+class JwtProcessorInterface(Protocol):
     @abstractmethod
-    def encode_access_token(self, user: UserDM, minutes: int | None = None) -> str:
+    def create_access_token(self, user_email: str) -> str:
         ...
     
     @abstractmethod
-    def decode_access_token(self, token: str) -> dict[str]:
+    def create_password_reset_token(self, user_email: str) -> str:
+        ...
+
+    @abstractmethod    
+    def create_refresh_token(self, user_email: str) -> str:
+        ...
+
+    @abstractmethod  
+    def verify_token(self, token: str, token_type: TokenType | None = None) -> str | None:
         ...

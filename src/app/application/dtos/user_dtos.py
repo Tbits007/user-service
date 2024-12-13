@@ -2,26 +2,16 @@ from dataclasses import dataclass
 
 
 @dataclass(slots=True)  
-class NewUserDTO:  
+class CreateUserDTO:  
     email: str 
+    username: str
     password: str 
-    is_active: bool 
-    is_superuser: bool 
+    is_active: bool = True
+    is_verified: bool = False
+    is_superuser: bool = False
 
 
 @dataclass(slots=True)  
-class UpdateUserDTO:
-    email: str | None = None
-    password: str | None = None
-    is_active: bool | None = None
-    is_superuser: bool | None = None
-
-
-@dataclass(slots=True)
-class GetUserByUuidDTO:
-    uuid: str
-
-
-@dataclass(slots=True)
-class GetUserByEmailDTO:
-    email: str
+class LoginUserDTO:  
+    email: str 
+    username: str

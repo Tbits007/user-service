@@ -1,7 +1,7 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.sql import text
 
-from app.application.interfaces.user_interfaces import UserReader, UserSaver, UserUpdater, UserDeleter
+from app.application.interfaces.user_interface import UserReader, UserSaver, UserUpdater, UserDeleter
 from app.domain.entities.user_entity import UserDM
 
 
@@ -65,7 +65,7 @@ class UserGateway(
             },
         )
 
-    async def update(self, uuid: str, user: UserDM) -> UserDM | None:
+    async def update(self, email: str, user: UserDM) -> UserDM | None:
         # Начальная часть запроса
         base_query = "UPDATE users SET "
         query_parts = []
