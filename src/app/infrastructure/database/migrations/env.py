@@ -1,14 +1,12 @@
-from os import environ as env
 from logging.config import fileConfig
-import os
 
 from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 
 from alembic import context
 
-from src.app.infrastructure.models.base_model import Base
-from src.app.infrastructure.models.user_model import User
+from app.infrastructure.database.models.base_model import Base
+from app.infrastructure.database.models.user_model import User
 from src.app.config import PostgresConfig
 
 # this is the Alembic Config object, which provides

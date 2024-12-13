@@ -7,7 +7,7 @@ from app.application.dtos.user_dtos import NewUserDTO
 from app.application.interactors.user_interactors import GetUserByEmailInteractor, GetUserByUuidInteractor, NewUserInteractor
 from app.application.interfaces.jwt_interface import JwtTokenInterface
 from app.application.interfaces.password_hasher_interface import PasswordHasherInterface
-from app.controllers.user_controllers.user_schemas import UserReadSchema, UserRegisterSchema, UserLoginSchema
+from app.presentation.schemas.user_schemas import UserReadSchema, UserRegisterSchema, UserLoginSchema
 from app.infrastructure.adapters.auth.utils import AddAccessTokenCookie, Authenticate, GetCurrentUser, GetToken
 
 router = APIRouter(

@@ -1,128 +1,58 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.sql import text
 
-from app.application.interfaces.user_interface import UserReader, UserSaver, UserUpdater, UserDeleter
+from app.application.interfaces.user_interface import UserReader, UserSaver, UserUpdater
 from app.domain.entities.user_entity import UserDM
+from app.infrastructure.models.user_model import User
 
 
 class UserGateway(
     UserReader,
     UserSaver,
-    UserUpdater,
-    UserDeleter,
+    UserUpdater
 ):
     def __init__(self, session: AsyncSession):
         self._session = session
 
-    async def read_by_uuid(self, uuid: str) -> UserDM | None:
-        query = text("SELECT * FROM users WHERE uuid = :uuid")
-        result = await self._session.execute(
-            statement=query,
-            params={"uuid": uuid},
-        )
-        row = result.fetchone()
-        if not row:
-            return None
-        return UserDM(
-            uuid=str(row.uuid),
-            email=row.email,
-            password=row.password,
-            is_active=row.is_active,
-            is_superuser=row.is_superuser
-        )
-
-    async def read_by_email(self, email: str) -> UserDM | None:
-        query = text("SELECT * FROM users WHERE email = :email")
-        result = await self._session.execute(
-            statement=query,
-            params={"email": email},
-        )
-        row = result.fetchone()
-        if not row:
-            return None
-        return UserDM(
-            uuid=row.uuid,
-            email=row.email,
-            password=row.password,
-            is_active=row.is_active,
-            is_superuser=row.is_superuser
-        )
-
     async def save(self, user: UserDM) -> None:
-        query = text(
-            """
-            INSERT INTO users (uuid, email, password, is_active, is_superuser)
-            VALUES (:uuid, :email, :password, :is_active, :is_superuser)"""
+        """Сохраняет нового пользователя в базе данных."""
+        db_user = User(
+            email=user.email,
+            username=user.username,
+            hashed_password=user.password,  # Предполагается, что пароль уже хэширован
+            is_active=user.is_active,
+            is_verified=user.is_verified,
+            is_superuser=user.is_superuser,
+        )
+        self._session.add(db_user)
+        await self._session.commit()
+
+    async def read_by_email(self, email: str) -> Optional[UserDM]:
+        """Читает пользователя из базы данных по email."""
+        query = select(User).where(User.email == email)
+        result = await self._session.execute(query)
+        try:
+            db_user = result.scalar_one()
+            return UserDM(
+                email=db_user.email,
+                username=db_user.username,
+                password=db_user.hashed_password,
+                is_active=db_user.is_active,
+                is_verified=db_user.is_verified,
+                is_superuser=db_user.is_superuser,
             )
-        await self._session.execute(
-            statement=query,
-            params={
-                "uuid": user.uuid,
-                "email": user.email,
-                "password": user.password,
-                "is_active": user.is_active,
-                "is_superuser": user.is_superuser
-            },
-        )
-
-    async def update(self, email: str, user: UserDM) -> UserDM | None:
-        # Начальная часть запроса
-        base_query = "UPDATE users SET "
-        query_parts = []
-        params = {"uuid": uuid}  # Параметры для SQL-запроса
-
-        # Добавляем только те поля, которые не None
-        if user.email is not None:
-            query_parts.append("email = :email")
-            params["email"] = user.email
-
-        if user.password is not None:
-            query_parts.append("password = :password")
-            params["password"] = user.password
-
-        if user.is_active is not None:
-            query_parts.append("is_active = :is_active")
-            params["is_active"] = user.is_active
-
-        if user.is_superuser is not None:
-            query_parts.append("is_superuser = :is_superuser")
-            params["is_superuser"] = user.is_superuser
-
-        # Если нечего обновлять, возвращаем None
-        if not query_parts:
+        except NoResultFound:
             return None
 
-        # Формируем полный SQL-запрос
-        query = text(
-            base_query + ", ".join(query_parts) + " WHERE uuid = :uuid RETURNING uuid, email, password, is_active, is_superuser"
-        )
-
-        # Выполняем запрос
-        result = await self._session.execute(
-            statement=query,
-            params=params,
-        )
-
-        # Получаем обновлённую строку
-        row = result.fetchone()
-        if not row:
-            return None
-
-        # Возвращаем обновлённый объект UserDM
-        return UserDM(
-            uuid=str(row.uuid),
-            email=row.email,
-            password=row.password,
-            is_active=row.is_active,
-            is_superuser=row.is_superuser
-        )
-
-    async def delete(self, uuid: str) -> None:
-        # Формируем SQL-запрос на удаление
-        query = text("DELETE FROM users WHERE uuid = :uuid")
-
-        # Выполняем запрос
-        await self._session.execute(
-            statement=query,
-            params={"uuid": uuid},
-        )
+    async def update(self, email: str, update_data: dict) -> None:
+        """Обновляет данные пользователя в базе данных."""
+        query = select(User).where(User.email == email)
+        result = await self._session.execute(query)
+        try:
+            db_user = result.scalar_one()
+            for field, value in update_data.items():
+                if hasattr(db_user, field):
+                    setattr(db_user, field, value)
+            await self._session.commit()
+        except NoResultFound:
+            raise ValueError(f"User with email {email} not found")
