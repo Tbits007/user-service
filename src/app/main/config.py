@@ -26,6 +26,7 @@ class JWTConfig(BaseModel):
     SECRET_KEY: str = Field(alias='SECRET_KEY')
     ALGORITHM: str = Field(alias='ALGORITHM')
     ACCESS_TOKEN_EXPIRES_MINUTES: int = Field(alias='ACCESS_TOKEN_EXPIRES_MINUTES')
+    REFRESH_TOKEN_EXPIRES_MINUTES: int = Field(alias='REFRESH_TOKEN_EXPIRES_MINUTES')
 
 
 class Config(BaseModel):
