@@ -2,7 +2,7 @@ from sqlalchemy import String, Boolean
 from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import mapped_column
 
-from app.infrastructure.database.models.base_model import Base
+from src.app.infrastructure.database.models.base_model import Base
 
 
 class User(Base):

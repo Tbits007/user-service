@@ -1,7 +1,7 @@
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker  
 from sqlalchemy.ext.asyncio import create_async_engine  
   
-from app.config import PostgresConfig  
+from app.main.config import PostgresConfig  
   
   
 def new_session_maker(psql_config: PostgresConfig) -> async_sessionmaker[AsyncSession]:  

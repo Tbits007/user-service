@@ -37,7 +37,7 @@ class UserGateway(
             return UserDM(
                 email=db_user.email,
                 username=db_user.username,
-                password=db_user.hashed_password,
+                password=db_user.password,
                 is_active=db_user.is_active,
                 is_verified=db_user.is_verified,
                 is_superuser=db_user.is_superuser,
@@ -45,7 +45,7 @@ class UserGateway(
         except Exception:
             return None
 
-    async def update(self, email: str, update_data: dict) -> None:
+    async def update(self, email: str, update_data: dict) -> UserDM | None:
         """Обновляет данные пользователя в базе данных."""
         query = select(User).where(User.email == email)
         result = await self._session.execute(query)
@@ -55,5 +55,16 @@ class UserGateway(
                 if hasattr(db_user, field):
                     setattr(db_user, field, value)
             await self._session.commit()
-        except Exception:
-            raise ValueError(f"User with email {email} not found")
+
+            # Преобразуем ORM-модель в доменную модель
+            return UserDM(
+                email=db_user.email,
+                username=db_user.username,
+                password=db_user.password,
+                is_active=db_user.is_active,
+                is_verified=db_user.is_verified,
+                is_superuser=db_user.is_superuser,
+            )
+        except Exception as e:
+            await self._session.rollback()
+            raise ValueError(f"User with email {email} not found") from e

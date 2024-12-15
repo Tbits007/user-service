@@ -33,7 +33,5 @@ def include_routers(_app: FastAPI) -> None:
     _app.include_router(user_router, prefix="/user", tags=["user", ])
 
 
-app = create_app()
-
 # $env:PYTHONPATH="C:\\PythonProjects\\FastAPIprojects\\user-service\\src"
-# uvicorn --factory app.main:get_app --reload
+# uvicorn --factory app.main.run:create_app --reload

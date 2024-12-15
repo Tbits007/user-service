@@ -1,18 +1,13 @@
 from fastapi import Request, HTTPException, Depends
-
+from os import environ as env
 from app.domain.exceptions.access import AuthenticationError
 from app.infrastructure.adapters.jwt_processor_impl import JwtTokenProcessor, TokenType
 from app.main.config import JWTConfig
 
 
 class JwtTokenAuthentication:
-    def __init__(self, config: JWTConfig):
-        self.jwt_token_processor = JwtTokenProcessor(
-            secret=config.SECRET_KEY,
-            access_token_expires=config.ACCESS_TOKEN_EXPIRES_MINUTES,
-            refresh_token_expires=config.REFRESH_TOKEN_EXPIRES_MINUTES,
-            algorithm=config.ALGORITHM,
-        )
+    def __init__(self):
+        self.jwt_token_processor = JwtTokenProcessor()
 
     async def __call__(self, request: Request) -> str:
         authorization = request.headers.get("Authorization")
@@ -28,7 +23,5 @@ class JwtTokenAuthentication:
             raise HTTPException(status_code=401, detail="Unauthorized")
 
 
-def get_user_email(
-        email: str = Depends(JwtTokenAuthentication(JWTConfig()))
-) -> str:
+def get_user_email(email: str = Depends(JwtTokenAuthentication())) -> str:
     return email

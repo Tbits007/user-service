@@ -20,5 +20,5 @@ class UpdateUserInteractor:
     ) -> None:  
         self._user_gateway = user_gateway  
 
-    async def __call__(self, email: str, update_data: dict) -> None:
+    async def __call__(self, email: str, update_data: dict) -> UserDM | None:
         return await self._user_gateway.update(email, update_data)

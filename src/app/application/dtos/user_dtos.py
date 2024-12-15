@@ -11,4 +11,4 @@ class CreateUserDTO:
 @dataclass(slots=True)  
 class LoginUserDTO:  
     email: str 
-    username: str
+    password: str

@@ -17,6 +17,6 @@ class UserReader(Protocol):
 
 class UserUpdater(Protocol):
     @abstractmethod
-    async def update(self, email: str, update_data: dict) -> None:
+    async def update(self, email: str, update_data: dict) -> UserDM | None:
         ...
 

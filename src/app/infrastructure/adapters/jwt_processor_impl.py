@@ -1,26 +1,23 @@
+from os import environ as env
 from datetime import timedelta, datetime, timezone
 from jose import jwt, JWTError
 
 from app.domain.exceptions.access import AuthenticationError
-from app.application.interfaces.jwt_processor_interface import JwtProcessorInterface, Algorithm, TokenType
+from app.application.interfaces.jwt_processor_interface import JwtProcessorInterface, TokenType
+from app.main.config import JWTConfig
 
 
 class JwtTokenProcessor(JwtProcessorInterface):
-    def __init__(
-            self,
-            secret: str,
-            access_token_expires: timedelta,
-            refresh_token_expires: timedelta,
-            algorithm: Algorithm
-    ) -> None:
-        self.secret = secret
-        self.access_token_expires = access_token_expires
-        self.refresh_token_expires = refresh_token_expires
-        self.algorithm = algorithm
+    def __init__(self) -> None:
+        config = JWTConfig(**env)
+        self.secret = config.SECRET_KEY
+        self.access_token_expires = config.ACCESS_TOKEN_EXPIRES_MINUTES
+        self.refresh_token_expires = config.REFRESH_TOKEN_EXPIRES_MINUTES
+        self.algorithm = config.ALGORITHM
 
     def create_access_token(self, user_email: str) -> str:
         issued_at = datetime.now(timezone.utc)
-        expires = issued_at + self.access_token_expires
+        expires = issued_at + timedelta(minutes=self.access_token_expires)
         to_encode = {
             "exp": expires,
             "iat": issued_at,
@@ -33,7 +30,7 @@ class JwtTokenProcessor(JwtProcessorInterface):
 
     def create_password_reset_token(self, user_email: str) -> str:
         issued_at = datetime.now(timezone.utc)
-        expires = issued_at + self.access_token_expires
+        expires = issued_at + timedelta(minutes=self.access_token_expires)
         to_encode = {
             "exp": expires,
             "iat": issued_at,
@@ -46,7 +43,7 @@ class JwtTokenProcessor(JwtProcessorInterface):
 
     def create_refresh_token(self, user_email: str) -> str:
         issued_at = datetime.now(timezone.utc)
-        expires = issued_at + self.refresh_token_expires
+        expires = issued_at + timedelta(minutes=self.refresh_token_expires)
         to_encode = {
             "exp": expires,
             "iat": issued_at,
