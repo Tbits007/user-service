@@ -1,8 +1,6 @@
 from fastapi import Request, HTTPException, Depends
-from os import environ as env
 from app.domain.exceptions.access import AuthenticationError
 from app.infrastructure.adapters.jwt_processor_impl import JwtTokenProcessor, TokenType
-from app.main.config import JWTConfig
 
 
 class JwtTokenAuthentication:
