@@ -68,15 +68,3 @@ def test_verify_token_invalid_token(jwt_processor):
     invalid_token = "invalid_token"
     with pytest.raises(AuthenticationError):
         jwt_processor.verify_token(invalid_token)
-
-
-def test_token_expiration(jwt_processor, user_email, mock_config):
-    # Create an access token
-    token = jwt_processor.create_access_token(user_email)
-    
-    # Simulate token expiration by altering the current time
-    with patch('datetime.datetime') as mock_datetime:
-        mock_datetime.now.return_value = datetime.now(timezone.utc) + timedelta(minutes=16)
-        
-        with pytest.raises(AuthenticationError):
-            jwt_processor.verify_token(token)

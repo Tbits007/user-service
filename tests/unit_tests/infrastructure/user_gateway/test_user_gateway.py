@@ -1,39 +1,14 @@
 import pytest
-from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
 from app.domain.entities.user_entity import UserDM
 from app.infrastructure.adapters.user_gateway import UserGateway
 from sqlalchemy import select
 
-from tests.unit_tests.infrastructure.user_gateway.config import get_postgres_config
-from tests.unit_tests.infrastructure.user_gateway.models.base_model import Base
 from tests.unit_tests.infrastructure.user_gateway.models.user_model import User
 
-@pytest.fixture
-async def engine():
-    engine = create_async_engine(get_postgres_config().DATABASE_URL, pool_recycle=1800)
-    return engine
-
-# Фикстура для создания базы данных
-@pytest.fixture(autouse=True)
-async def setup_database(engine):
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
-    yield
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.drop_all)
-
-@pytest.fixture
-def new_session_maker(engine):  
-    return async_sessionmaker(engine, class_=AsyncSession, autoflush=False, expire_on_commit=False)
-
-@pytest.fixture
-async def async_session(new_session_maker):
-    async with new_session_maker() as session:
-        yield session
 
 # Тест на сохранение пользователя
 @pytest.mark.asyncio
-async def test_save_user(async_session):
+async def test_save_user(setup_database, async_session):
     user_gateway = UserGateway(async_session)
     user_dm = UserDM(
         email="test@example.com",
@@ -55,7 +30,7 @@ async def test_save_user(async_session):
 
 # Тест на чтение пользователя по email
 @pytest.mark.asyncio
-async def test_read_user_by_email(async_session):
+async def test_read_user_by_email(setup_database, async_session):
     user_gateway = UserGateway(async_session)
     # Добавляем пользователя напрямую в базу
     user = User(
@@ -78,7 +53,7 @@ async def test_read_user_by_email(async_session):
 
 # Тест на обновление пользователя
 @pytest.mark.asyncio
-async def test_update_user(async_session):
+async def test_update_user(setup_database, async_session):
     user_gateway = UserGateway(async_session)
     # Добавляем пользователя напрямую в базу
     user = User(
@@ -109,7 +84,7 @@ async def test_update_user(async_session):
 
 # Тест на обновление несуществующего пользователя
 @pytest.mark.asyncio
-async def test_update_nonexistent_user(async_session):
+async def test_update_nonexistent_user(setup_database, async_session):
     user_gateway = UserGateway(async_session)
     with pytest.raises(ValueError) as exc_info:
         await user_gateway.update("nonexistent@example.com", {"username": "updateduser"})
