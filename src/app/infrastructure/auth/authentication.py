@@ -1,4 +1,5 @@
-from fastapi import Request, HTTPException, Depends
+from fastapi import Depends, HTTPException, Request
+
 from app.domain.exceptions.access import AuthenticationError
 from app.infrastructure.adapters.jwt_processor_impl import JwtTokenProcessor, TokenType
 

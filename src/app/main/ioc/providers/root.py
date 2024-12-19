@@ -1,6 +1,6 @@
 from typing import AsyncGenerator
 
-from dishka import Provider, Scope, provide, from_context
+from dishka import Provider, Scope, from_context, provide
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from app.application.interfaces.email_sender_interface import EmailSender
@@ -17,7 +17,9 @@ class RootProvider(Provider):
         return new_session_maker(config.postgres)
 
     @provide(scope=Scope.REQUEST)
-    async def get_session(self, session_maker: async_sessionmaker[AsyncSession]) -> AsyncGenerator[AsyncSession, None]:
+    async def get_session(
+        self, session_maker: async_sessionmaker[AsyncSession]
+    ) -> AsyncGenerator[AsyncSession, None]:
         async with session_maker() as session:
             yield session
 

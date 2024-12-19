@@ -6,11 +6,7 @@ from app.domain.entities.user_entity import UserDM
 from app.infrastructure.database.models.user_model import User
 
 
-class UserGateway(
-    UserReader,
-    UserSaver,
-    UserUpdater
-):
+class UserGateway(UserReader, UserSaver, UserUpdater):
     def __init__(self, session: AsyncSession):
         self._session = session
 
@@ -26,7 +22,6 @@ class UserGateway(
         )
         self._session.add(db_user)
         await self._session.commit()
-
 
     async def read_by_email(self, email: str) -> UserDM | None:
         """Читает пользователя из базы данных по email."""

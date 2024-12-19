@@ -1,11 +1,11 @@
-from fastapi import APIRouter, status, HTTPException
 from dishka.integrations.base import FromDishka
 from dishka.integrations.fastapi import inject
+from fastapi import APIRouter, HTTPException, status
 
+from app.application.dtos.user_dtos import CreateUserDTO, LoginUserDTO
+from app.application.interactors import auth_interactors
 from app.domain.exceptions.access import AuthenticationError
 from app.domain.exceptions.user import UserCannotBeCreatedError
-from app.application.interactors import auth_interactors
-from app.application.dtos.user_dtos import CreateUserDTO, LoginUserDTO
 from app.presentation.controllers.http.auth.schemas import request as request_schemas
 
 auth_router = APIRouter()
@@ -14,8 +14,8 @@ auth_router = APIRouter()
 @auth_router.post("/register")
 @inject
 async def register(
-        data: request_schemas.RegisterRequest,
-        interactor: FromDishka[auth_interactors.RegisterInteractor]
+    data: request_schemas.RegisterRequest,
+    interactor: FromDishka[auth_interactors.RegisterInteractor],
 ) -> dict[str, str]:
     try:
         dto = CreateUserDTO(
@@ -35,42 +35,34 @@ async def register(
 @auth_router.get("/verify-email")
 @inject
 async def verify(
-        token: str,
-        interactor: FromDishka[auth_interactors.VerifyInteractor]
-)-> dict[str, str]:
+    token: str, interactor: FromDishka[auth_interactors.VerifyInteractor]
+) -> dict[str, str]:
     try:
         await interactor(token)
         return {"message": "User verified successfully"}
     except AuthenticationError:
-        raise HTTPException(
-            status_code=401, detail="Authentication failed"
-        )
-    
+        raise HTTPException(status_code=401, detail="Authentication failed")
+
 
 @auth_router.post("/login")
 @inject
 async def login(
-        data: request_schemas.LoginRequest,
-        interactor: FromDishka[auth_interactors.LoginInteractor]
+    data: request_schemas.LoginRequest,
+    interactor: FromDishka[auth_interactors.LoginInteractor],
 ) -> dict[str, str]:
     try:
-        dto = LoginUserDTO(
-            email=str(data.email),
-            password=data.password
-        )
+        dto = LoginUserDTO(email=str(data.email), password=data.password)
         tokens = await interactor(dto)
         return tokens
     except AuthenticationError:
-        raise HTTPException(
-            status_code=401, detail="Authentication failed"
-        )
+        raise HTTPException(status_code=401, detail="Authentication failed")
 
 
 @auth_router.post("/password-reset")
 @inject
 async def password_reset(
-        data: request_schemas.PasswordResetRequest,
-        interactor: FromDishka[auth_interactors.PasswordResetInteractor]
+    data: request_schemas.PasswordResetRequest,
+    interactor: FromDishka[auth_interactors.PasswordResetInteractor],
 ) -> dict[str, str]:
     await interactor(str(data.email))
     return {"message": "Reset link was successfully sent"}
@@ -79,13 +71,11 @@ async def password_reset(
 @auth_router.post("/password-reset-confirm")
 @inject
 async def password_reset_confirm(
-        data: request_schemas.PasswordResetConfirmRequest,
-        interactor: FromDishka[auth_interactors.PasswordResetConfirmInteractor]
+    data: request_schemas.PasswordResetConfirmRequest,
+    interactor: FromDishka[auth_interactors.PasswordResetConfirmInteractor],
 ) -> dict[str, str]:
     try:
         await interactor(data.token, data.new_password)
         return {"message": "New password has been successfully set"}
     except AuthenticationError:
-        raise HTTPException(
-            status_code=401, detail="Authentication failed"
-        )
+        raise HTTPException(status_code=401, detail="Authentication failed")

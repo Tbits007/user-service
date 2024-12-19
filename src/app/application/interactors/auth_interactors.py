@@ -1,19 +1,22 @@
 from app.application.dtos.user_dtos import CreateUserDTO, LoginUserDTO
-from app.application.interfaces.jwt_processor_interface import JwtProcessorInterface, TokenType
+from app.application.interfaces.email_sender_interface import EmailSender
+from app.application.interfaces.jwt_processor_interface import (
+    JwtProcessorInterface,
+    TokenType,
+)
 from app.application.interfaces.password_hasher_interface import PasswordHasherInterface
 from app.application.interfaces.user_interface import UserReader, UserSaver, UserUpdater
-from app.application.interfaces.email_sender_interface import EmailSender
 from app.domain.entities.user_entity import UserDM
 from app.domain.exceptions.access import AuthenticationError
 
 
 class RegisterInteractor:
     def __init__(
-            self,
-            user_gateway: UserSaver,
-            email_gateway: EmailSender,
-            jwt_token_processor: JwtProcessorInterface,
-            password_hasher: PasswordHasherInterface
+        self,
+        user_gateway: UserSaver,
+        email_gateway: EmailSender,
+        jwt_token_processor: JwtProcessorInterface,
+        password_hasher: PasswordHasherInterface,
     ) -> None:
         self._user_gateway = user_gateway
         self._email_gateway = email_gateway
@@ -39,9 +42,7 @@ class RegisterInteractor:
 
 class VerifyInteractor:
     def __init__(
-            self,
-            user_gateway: UserUpdater,
-            jwt_token_processor: JwtProcessorInterface
+        self, user_gateway: UserUpdater, jwt_token_processor: JwtProcessorInterface
     ) -> None:
         self._user_gateway = user_gateway
         self._jwt_token_processor = jwt_token_processor
@@ -55,10 +56,10 @@ class VerifyInteractor:
 
 class LoginInteractor:
     def __init__(
-            self,
-            user_gateway: UserReader,
-            password_hasher: PasswordHasherInterface,
-            jwt_token_processor: JwtProcessorInterface
+        self,
+        user_gateway: UserReader,
+        password_hasher: PasswordHasherInterface,
+        jwt_token_processor: JwtProcessorInterface,
     ) -> None:
         self._user_gateway = user_gateway
         self._password_hasher = password_hasher
@@ -66,26 +67,24 @@ class LoginInteractor:
 
     async def __call__(self, dto: LoginUserDTO) -> dict:
         user = await self._user_gateway.read_by_email(dto.email)
-        if not user or not self._password_hasher.verify_password(dto.password, user.password):
+        if not user or not self._password_hasher.verify_password(
+            dto.password, user.password
+        ):
             raise AuthenticationError
         if not user.is_verified:
             raise AuthenticationError
 
-        access_token = self._jwt_token_processor.create_access_token(
-            user.email
-        )
-        refresh_token = self._jwt_token_processor.create_refresh_token(
-            user.email
-        )
+        access_token = self._jwt_token_processor.create_access_token(user.email)
+        refresh_token = self._jwt_token_processor.create_refresh_token(user.email)
         return {"access_token": access_token, "refresh_token": refresh_token}
-    
+
 
 class PasswordResetInteractor:
     def __init__(
-            self,
-            user_gateway: UserReader,
-            email_gateway: EmailSender,
-            jwt_token_processor: JwtProcessorInterface
+        self,
+        user_gateway: UserReader,
+        email_gateway: EmailSender,
+        jwt_token_processor: JwtProcessorInterface,
     ) -> None:
         self._user_gateway = user_gateway
         self._email_gateway = email_gateway
@@ -105,10 +104,10 @@ class PasswordResetInteractor:
 
 class PasswordResetConfirmInteractor:
     def __init__(
-            self,
-            user_gateway: UserUpdater,
-            password_hasher: PasswordHasherInterface,
-            jwt_token_processor: JwtProcessorInterface
+        self,
+        user_gateway: UserUpdater,
+        password_hasher: PasswordHasherInterface,
+        jwt_token_processor: JwtProcessorInterface,
     ):
         self._user_gateway = user_gateway
         self._password_hasher = password_hasher

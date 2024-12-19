@@ -1,5 +1,9 @@
 import pytest
-from app.application.interactors.user_interactors import GetUserInteractor, UpdateUserInteractor
+
+from app.application.interactors.user_interactors import (
+    GetUserInteractor,
+    UpdateUserInteractor,
+)
 from app.domain.entities.user_entity import UserDM
 
 
@@ -7,7 +11,9 @@ from app.domain.entities.user_entity import UserDM
 async def test_get_user_interactor(mock_user_reader):
     # Подготовка
     email = "test@example.com"
-    mock_user = UserDM(email=email, username="Test User", password="0123456789")  # Замоканный объект UserDM
+    mock_user = UserDM(
+        email=email, username="Test User", password="0123456789"
+    )  # Замоканный объект UserDM
     mock_user_reader.read_by_email.return_value = mock_user
 
     # Интерактор

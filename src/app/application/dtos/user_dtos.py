@@ -1,14 +1,14 @@
 from dataclasses import dataclass
 
 
-@dataclass(slots=True)  
-class CreateUserDTO:  
-    email: str 
+@dataclass(slots=True)
+class CreateUserDTO:
+    email: str
     username: str
-    password: str 
+    password: str
 
 
-@dataclass(slots=True)  
-class LoginUserDTO:  
-    email: str 
+@dataclass(slots=True)
+class LoginUserDTO:
+    email: str
     password: str

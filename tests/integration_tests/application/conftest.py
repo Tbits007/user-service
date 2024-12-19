@@ -1,10 +1,12 @@
-import pytest
 from unittest.mock import AsyncMock
+
+import pytest
+
 from app.application.interfaces import (
-    user_interface,
     email_sender_interface,
     jwt_processor_interface,
-    password_hasher_interface
+    password_hasher_interface,
+    user_interface,
 )
 
 

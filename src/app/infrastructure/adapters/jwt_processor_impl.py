@@ -1,9 +1,13 @@
+from datetime import datetime, timedelta, timezone
 from os import environ as env
-from datetime import timedelta, datetime, timezone
-from jose import jwt, JWTError
 
+from jose import JWTError, jwt
+
+from app.application.interfaces.jwt_processor_interface import (
+    JwtProcessorInterface,
+    TokenType,
+)
 from app.domain.exceptions.access import AuthenticationError
-from app.application.interfaces.jwt_processor_interface import JwtProcessorInterface, TokenType
 from app.main.config import JWTConfig
 
 
@@ -25,7 +29,9 @@ class JwtTokenProcessor(JwtProcessorInterface):
             "type": TokenType.ACCESS.value,
         }
         return jwt.encode(
-            to_encode, self.secret, algorithm=self.algorithm,
+            to_encode,
+            self.secret,
+            algorithm=self.algorithm,
         )
 
     def create_password_reset_token(self, user_email: str) -> str:
@@ -38,7 +44,9 @@ class JwtTokenProcessor(JwtProcessorInterface):
             "type": TokenType.PASSWORD_RESET.value,
         }
         return jwt.encode(
-            to_encode, self.secret, algorithm=self.algorithm,
+            to_encode,
+            self.secret,
+            algorithm=self.algorithm,
         )
 
     def create_refresh_token(self, user_email: str) -> str:
@@ -51,19 +59,22 @@ class JwtTokenProcessor(JwtProcessorInterface):
             "type": TokenType.REFRESH.value,
         }
         return jwt.encode(
-            to_encode, self.secret, algorithm=self.algorithm,
+            to_encode,
+            self.secret,
+            algorithm=self.algorithm,
         )
 
-    def verify_token(self, token: str, token_type: TokenType | None = None) -> str | None:
+    def verify_token(
+        self, token: str, token_type: TokenType | None = None
+    ) -> str | None:
         try:
             payload = jwt.decode(
-                token, self.secret, algorithms=[self.algorithm],
+                token,
+                self.secret,
+                algorithms=[self.algorithm],
             )
             if token_type and payload.get("type") != token_type.value:
                 raise AuthenticationError("Invalid token type")
             return payload["sub"]
         except JWTError:
             raise AuthenticationError
-
-
-
