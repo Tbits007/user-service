@@ -8,7 +8,7 @@ class JwtTokenAuthentication:
     def __init__(self):
         self.jwt_token_processor = JwtTokenProcessor()
 
-    async def __call__(self, request: Request) -> str:
+    async def __call__(self, request: Request) -> str | None:
         authorization = request.headers.get("Authorization")
         if not authorization or not authorization.startswith("Bearer "):
             raise HTTPException(status_code=401, detail="Unauthorized")
