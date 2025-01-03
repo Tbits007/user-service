@@ -33,7 +33,3 @@ class SMTPEmailSender(EmailSender):
             print(f"Email sent successfully to {recipient}")
         except Exception as e:
             print(f"Error sending email to {recipient}: {e}")
-
-
-    def create_verification_link(self, token: str) -> str:
-        return f"https://localhost:8000/verify-email?token={token}"

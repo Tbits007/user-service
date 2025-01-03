@@ -7,4 +7,5 @@ class UserCannotBeCreatedError(ApplicationError):
         self.reason = reason
 
 
-class UserNotFoundError(ApplicationError): ...
+class UserNotFoundError(ApplicationError):
+    ...

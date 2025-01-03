@@ -1,6 +1,7 @@
 from app.application.interfaces import user_interface
-from app.domain.entities.user_entity import User
 from app.application.interfaces.uow_interface import UnitOfWork
+from app.domain.entities.user_entity import User
+
 
 class GetUserInteractor:
     def __init__(
@@ -26,5 +27,5 @@ class UpdateUserInteractor:
         async with self._uow:
             user = await self._user_gateway.update(email, update_data)
             self._uow.commit()
-        
+
         return user
