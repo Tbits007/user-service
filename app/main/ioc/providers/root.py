@@ -1,7 +1,7 @@
 from typing import AsyncGenerator
 
+from aiokafka import AIOKafkaProducer
 from dishka import Provider, Scope, from_context, provide
-from faststream.kafka.fastapi import KafkaBroker
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from app.application.interfaces.email_provider_interface import EmailProvider
@@ -18,7 +18,6 @@ from app.main.config import Config
 
 class RootProvider(Provider):
     config = from_context(provides=Config, scope=Scope.APP)
-    broker = from_context(provides=KafkaBroker, scope=Scope.APP)
 
     @provide(scope=Scope.APP)
     def get_session_maker(self, config: Config) -> async_sessionmaker[AsyncSession]:
@@ -37,6 +36,10 @@ class RootProvider(Provider):
             username=config.smtp_.login,
             password=config.smtp_.password,
         )
+
+    @provide(scope=Scope.APP)
+    def get_producer(self, config: Config) -> AIOKafkaProducer:
+        return AIOKafkaProducer(bootstrap_servers=config.kafka_.uri)
 
     email_provider = provide(
         SimpleEmailProvider,

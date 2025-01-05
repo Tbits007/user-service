@@ -1,16 +1,14 @@
 from dishka import FromDishka
 from dishka.integrations.fastapi import inject
-from fastapi import HTTPException, status
-from faststream.kafka.fastapi import KafkaRouter
+from fastapi import APIRouter, HTTPException, status
 
 from app.application.dtos.user_dtos import CreateUserDTO, LoginUserDTO
 from app.application.exceptions.access import AuthenticationError
 from app.application.exceptions.user import UserCannotBeCreatedError
 from app.application.interactors import auth_interactors
-from app.presentation.controllers.http.action_schema import ActionSchema
 from app.presentation.controllers.http.auth.schemas import request as request_schemas
 
-auth_router = KafkaRouter()
+auth_router = APIRouter()
 
 
 @auth_router.post("/register")
@@ -26,15 +24,6 @@ async def register(
             password=data.password,
         )
         await interactor(dto)
-
-        # send user action to kafka
-        action = ActionSchema(
-            email=data.email,
-            action_type="register",
-            details="User registered successfully",
-        )
-        await auth_router.broker.publish(action, "user-service-actions")
-
         return {"message": "User created successfully"}
     except UserCannotBeCreatedError as exc:
         raise HTTPException(
@@ -62,15 +51,6 @@ async def login(
     try:
         dto = LoginUserDTO(email=str(data.email), password=data.password)
         tokens = await interactor(dto)
-
-        # send user action to kafka
-        action = ActionSchema(
-            email=data.email,
-            action_type="login",
-            details="User logged in successfully",
-        )
-        await auth_router.broker.publish(action, "user-service-actions")
-
         return tokens
     except AuthenticationError:
         raise HTTPException(status_code=401, detail="Authentication failed")

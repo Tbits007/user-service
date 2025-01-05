@@ -18,7 +18,7 @@ class SAUnitOfWork(UnitOfWork):
         await self.rollback()
 
     async def commit(self) -> None:
-        self._session.commit()
+        await self._session.commit()
 
     async def rollback(self) -> None:
         await self._session.rollback()

@@ -1,11 +1,17 @@
+import json
+from dataclasses import asdict
+
 from app.application.dtos.user_dtos import CreateUserDTO, LoginUserDTO
 from app.application.exceptions.access import AuthenticationError
 from app.application.interfaces.email_sender_interface import EmailSender
 from app.application.interfaces.jwt_processor_interface import JwtTokenProcessor, TokenType
 from app.application.interfaces.link_creator_interface import LinkCreator
+from app.application.interfaces.outbox_interface import OutboxSaver
 from app.application.interfaces.password_hasher_interface import PasswordHasher
 from app.application.interfaces.uow_interface import UnitOfWork
 from app.application.interfaces.user_interface import UserReader, UserSaver, UserUpdater
+from app.domain.entities.action_entity import ActionSchema, ActionType
+from app.domain.entities.message_entity import Message
 from app.domain.entities.user_entity import User
 
 
@@ -13,6 +19,7 @@ class RegisterInteractor:
     def __init__(
         self,
         user_gateway: UserSaver,
+        outbox_gateway: OutboxSaver,
         email_sender: EmailSender,
         link_creator: LinkCreator,
         jwt_token_processor: JwtTokenProcessor,
@@ -20,6 +27,7 @@ class RegisterInteractor:
         uow: UnitOfWork,
     ) -> None:
         self._user_gateway = user_gateway
+        self._outbox_gateway = outbox_gateway
         self._email_sender = email_sender
         self._link_creator = link_creator
         self._jwt_token_processor = jwt_token_processor
@@ -35,6 +43,7 @@ class RegisterInteractor:
                 password=hashed_password,
             )
             await self._user_gateway.save(user)
+
             token = self._jwt_token_processor.create_access_token(dto.email)
             verification_link = self._link_creator.create_verification_link(token)
             await self._email_sender.send_email(
@@ -42,6 +51,16 @@ class RegisterInteractor:
                 subject="Account verification",
                 body=f"Hi {dto.username}, visit the link: {verification_link} to verify account",
             )
+
+            action = ActionSchema(
+                email=dto.email,
+                action_type=ActionType.USER_CREATED.value,
+                details=f"User {dto.email} created successfully",
+            )
+            payload = json.dumps(asdict(action))
+            message = Message(payload=payload)
+            await self._outbox_gateway.save(message)
+
             await self._uow.commit()
 
 
